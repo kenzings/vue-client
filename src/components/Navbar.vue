@@ -98,12 +98,15 @@ const router = useRouter()
 
 
 const navigationWithState = computed(() => {
-  return router.options.routes
-    .filter((r) => r.meta?.layout === 'Default') // Lọc route có layout là Default
-    .map((item) => ({
-      name: item.name,
-      href: item.path,
-      current: route.path === item.path, // Xác định trạng thái hiện tại
-    }));
+    return router.options.routes
+        .filter((r) =>
+            r.meta?.layout === 'Default' && // Lọc route có layout là Default
+            !r.path.includes(':')
+        )
+        .map((item) => ({
+            name: item.name,
+            href: item.path,
+            current: route.path === item.path,
+        }));
 });
 </script>
