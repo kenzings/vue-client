@@ -59,18 +59,34 @@
     </div>
 </template>
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import ProductCard from '@/components/products/ProductCard.vue';
 import PostCard from '@/components/posts/PostCard.vue';
+import productsData from '@/data/products.json';
+import postsData from '@/data/posts.json';
+import type { Product } from '@/types/Product';
+import type { Post } from '@/types/Post';
 // Mock products
-const products = Array.from({ length: 45 }, (_, i) => ({
-    id: i + 1,
-    name: `Product ${i + 1}`,
-    href: '#',
-    price: `$${(Math.random() * 100).toFixed(2)}`,
-    imageSrc: 'https://via.placeholder.com/150',
-    imageAlt: `Product ${i + 1}`,
-}));
+// const products = Array.from({ length: 45 }, (_, i) => ({
+//     id: i + 1,
+//     name: `Product ${i + 1}`,
+//     href: '#',
+//     price: `$${(Math.random() * 100).toFixed(2)}`,
+//     imageSrc: 'https://via.placeholder.com/150',
+//     imageAlt: `Product ${i + 1}`,
+// }));
+
+
+const products = ref<Product[]>([]);
+// Mock posts
+const posts = ref<Post[]>([]);
+
+const selectedCategories = ref<string[]>([]);
+
+onMounted(() => {
+    products.value = productsData.products;
+    posts.value = postsData.posts;
+});
 
 // Mock categories
 const categories = [
@@ -79,43 +95,34 @@ const categories = [
     { id: 3, name: 'Category 3' },
 ];
 
+// Filtering
+const filteredProducts = computed(() => {
+    if (selectedCategories.value.length === 0) {
+        return products.value;
+    }
+    return products.value.filter(product =>
+        product.category && selectedCategories.value.includes(product.category)
+    );
+});
+
 // Pagination logic
 const currentPage = ref(1);
-const itemsPerPage = 20;
+const itemsPerPage = 12; // Changed to 12 for better grid layout
 
 const totalPages = computed(() =>
-    Math.ceil(products.length / itemsPerPage)
+    Math.ceil(filteredProducts.value.length / itemsPerPage)
 );
 
 const paginatedProducts = computed(() =>
-    products.slice(
+    filteredProducts.value.slice(
         (currentPage.value - 1) * itemsPerPage,
         currentPage.value * itemsPerPage
     )
 );
 
-// Mock posts
-const posts = [
-    {
-        id: 1,
-        title: 'News Title 1',
-        summary: 'This is a summary of the news post 1.',
-        image: 'https://www.greatplacetowork.com/templates/gptw/images/no-image-available.jpg',
-        link: {name: 'PostDetail', params: { id: 1 }},
-    },
-    {
-        id: 2,
-        title: 'News Title 2',
-        summary: 'This is a summary of the news post 2.',
-        image: 'https://www.greatplacetowork.com/templates/gptw/images/no-image-available.jpg',
-        link: {name: 'PostDetail', params: { id: 2 }},
-    },
-    {
-        id: 3,
-        title: 'News Title 3',
-        summary: 'This is a summary of the news post 3.',
-        image: 'https://www.greatplacetowork.com/templates/gptw/images/no-image-available.jpg',
-        link: {name: 'PostDetail', params: { id: 3 }},
-    },
-];
+// Reset page when filters change
+watch(selectedCategories, () => {
+    currentPage.value = 1;
+});
+
 </script>

@@ -1,0 +1,25 @@
+{
+    "posts": [
+        {
+            "id": 1,
+            "title": "News Title 1",
+            "summary": "This is a summary of the news post 1.",
+            "content": "Full content of news post 1",
+            "image": "https://www.greatplacetowork.com/templates/gptw/images/no-image-available.jpg"
+        },
+        {
+            "id": 2,
+            "title": "News Title 2",
+            "summary": "This is a summary of the news post 2.",
+            "content": "Full content of news post 2",
+            "image": "https://www.greatplacetowork.com/templates/gptw/images/no-image-available.jpg"
+        },
+        {
+            "id": 3,
+            "title": "News Title 3",
+            "summary": "This is a summary of the news post 3.",
+            "content": "Full content of news post 3",
+            "image": "https://www.greatplacetowork.com/templates/gptw/images/no-image-available.jpg"
+        }
+    ]
+}

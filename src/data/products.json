@@ -1,0 +1,31 @@
+{
+    "products": [
+      {
+        "id": 1,
+        "name": "iPhone 14 Pro",
+        "price": 999,
+        "description": "Latest iPhone with dynamic island",
+        "rating": 5,
+        "reviews": 50,
+        "image": "https://placehold.co/800x600"
+      },
+      {
+        "id": 2,
+        "name": "Samsung Galaxy S23",
+        "price": 899,
+        "description": "Flagship Android phone",
+        "rating": 5,
+        "reviews": 70,
+        "image": "https://placehold.co/800x600"
+      },
+      {
+        "id": 3,
+        "name": "MacBook Pro",
+        "price": 1999,
+        "description": "Powerful laptop for professionals",
+        "rating": 5,
+        "reviews": 100,
+        "image": "https://placehold.co/800x600"
+      }
+    ]
+  }
