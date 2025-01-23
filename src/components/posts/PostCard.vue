@@ -11,7 +11,7 @@
             <p class="mt-2 text-sm text-gray-600">
                 {{ post.summary }}
             </p>
-            <RouterLink :to="post.link" class="mt-4 inline-block text-sm font-medium text-indigo-600 hover:underline">
+            <RouterLink :to="{name: 'PostDetail', params: {id: post.id}}" class="mt-4 inline-block text-sm font-medium text-indigo-600 hover:underline">
                 Read more
             </RouterLink>
         </div>
@@ -19,19 +19,11 @@
 </template>
 
 <script setup lang="ts">
-// Props định nghĩa dữ liệu bài viết
-defineProps({
-    post: {
-        type: Object,
-        required: true,
-        default: () => ({
-            image: '',
-            title: '',
-            summary: '',
-            link: '#',
-        }),
-    },
-});
+import type { Post } from '@/types/Post';
+
+defineProps<{
+  post: Post;
+}>();
 </script>
 
 <style scoped>
