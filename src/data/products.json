@@ -7,7 +7,9 @@
         "description": "Latest iPhone with dynamic island",
         "rating": 5,
         "reviews": 50,
-        "image": "https://placehold.co/800x600"
+        "image": "https://placehold.co/800x600",
+        "category": "Smartphone",
+        "featured": true
       },
       {
         "id": 2,
@@ -16,7 +18,9 @@
         "description": "Flagship Android phone",
         "rating": 5,
         "reviews": 70,
-        "image": "https://placehold.co/800x600"
+        "image": "https://placehold.co/800x600",
+        "category": "Smartphone",
+        "featured": false
       },
       {
         "id": 3,
@@ -25,7 +29,9 @@
         "description": "Powerful laptop for professionals",
         "rating": 5,
         "reviews": 100,
-        "image": "https://placehold.co/800x600"
+        "image": "https://placehold.co/800x600",
+        "category": "Laptop",
+        "featured": true
       }
     ]
   }

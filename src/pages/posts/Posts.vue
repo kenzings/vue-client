@@ -7,31 +7,15 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import PostCard from '@/components/posts/PostCard.vue';
-
-const posts = [
-    {
-        id: 1,
-        title: 'News Title 1',
-        summary: 'This is a summary of the news post 1.',
-        image: 'https://www.greatplacetowork.com/templates/gptw/images/no-image-available.jpg',
-        link: { name: 'PostDetail', params: { id: 1 } },
-    },
-    {
-        id: 2,
-        title: 'News Title 2',
-        summary: 'This is a summary of the news post 2.',
-        image: 'https://www.greatplacetowork.com/templates/gptw/images/no-image-available.jpg',
-        link: { name: 'PostDetail', params: { id: 2 } },
-    },
-    {
-        id: 3,
-        title: 'News Title 3',
-        summary: 'This is a summary of the news post 3.',
-        image: 'https://www.greatplacetowork.com/templates/gptw/images/no-image-available.jpg',
-        link: { name: 'PostDetail', params: { id: 3 } },
-    },
-];
+import type { Post } from '@/types/Post';
+import PostsData from '@/data/posts.json';
+const posts = ref<Post[]>([]);
+onMounted(() => {
+    // products.value = productsData.products;
+    posts.value = PostsData.posts;
+});
 </script>
 
 <style scoped></style>
