@@ -1,21 +1,29 @@
 <template>
   <div class="group">
-    <img :src="product.image" :alt="`${product.name }`"
+    <img :src="product.image" :alt="`${product.name}`"
       class="aspect-square w-full rounded-lg bg-gray-200 object-cover group-hover:opacity-75 xl:aspect-[7/8]" />
-    <RouterLink :to="{ name: 'ProductDetail', params: { id: product.id }}" class="mt-4 block text-sm font-medium text-gray-700 hover:text-blue-500">
+    <RouterLink :to="{ name: 'ProductDetail', params: { id: product.id } }"
+      class="mt-4 block text-sm font-medium text-gray-700 hover:text-blue-500">
       {{ product.name }}
     </RouterLink>
-    <p class="mt-1 text-lg font-medium text-gray-900">{{ product.price }}</p>
+    <p class="mt-1 text-lg font-medium text-gray-900">{{ formattedPrice }}</p>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import type { Product } from '@/types/Product';
 
-defineProps<{
+// Định nghĩa props
+const props = defineProps<{
   product: Product;
 }>();
+
+// Computed cho giá định dạng
+const formattedPrice = computed(() => {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(props.product.price);
+});
 </script>
 
 <style scoped>

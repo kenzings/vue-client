@@ -12,11 +12,11 @@
             <aside class="col-span-3 bg-white rounded-lg shadow p-4">
                 <h2 class="text-lg font-semibold mb-4">Filters</h2>
                 <div>
-                    <h3 class="text-md font-medium mb-2">Category</h3>
                     <ul class="space-y-2">
                         <li v-for="category in categories" :key="category.id">
                             <label class="inline-flex items-center">
-                                <input type="checkbox" class="form-checkbox h-5 w-5 text-indigo-600" />
+                                <input type="checkbox" class="form-checkbox h-5 w-5 text-indigo-600"
+                                    :value="category.name" v-model="selectedCategories" />
                                 <span class="ml-2 text-gray-700">{{ category.name }}</span>
                             </label>
                         </li>
@@ -62,10 +62,12 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import ProductCard from '@/components/products/ProductCard.vue';
 import PostCard from '@/components/posts/PostCard.vue';
-import productsData from '@/data/products.json';
-import postsData from '@/data/posts.json';
 import type { Product } from '@/types/Product';
 import type { Post } from '@/types/Post';
+import type { Categories } from '@/types/Categories';
+import productsData from '@/data/products.json';
+import postsData from '@/data/posts.json';
+import categoriesData from '@/data/categories.json';
 // Mock products
 // const products = Array.from({ length: 45 }, (_, i) => ({
 //     id: i + 1,
@@ -86,14 +88,11 @@ const selectedCategories = ref<string[]>([]);
 onMounted(() => {
     products.value = productsData.products;
     posts.value = postsData.posts;
+    categories.value = categoriesData.categories;
 });
 
 // Mock categories
-const categories = [
-    { id: 1, name: 'Category 1' },
-    { id: 2, name: 'Category 2' },
-    { id: 3, name: 'Category 3' },
-];
+const categories = ref<Categories[]>([]);
 
 // Filtering
 const filteredProducts = computed(() => {
