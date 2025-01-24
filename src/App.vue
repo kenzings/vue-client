@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import DefaultLayout from '@/layouts/Default.vue';
 import AuthLayout from '@/layouts/Auth.vue';
 import  { SpeedInsights }  from "@vercel/speed-insights/vue"
+import { Analytics } from '@vercel/analytics/vue'
 
 // Khai báo type cho Tawk_API
 declare global {
@@ -38,6 +39,7 @@ window.Tawk_API = window.Tawk_API || {};
 
 <template>
   <SpeedInsights />
+  <Analytics />
   <component :is="layout">
     <RouterView />
   </component>
