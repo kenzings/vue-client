@@ -2,7 +2,7 @@
     <div class="bg-gray-100 min-h-screen">
         <!-- Banner -->
         <div class="relative bg-cover bg-center h-64 flex items-center justify-center text-white"
-            style="background-image: url('/public/bg/bg-pro-2.jpg');">
+            style="background-image: url('/bg/bg-pro-2.jpg');">
             <h1 class="text-4xl text-green-600 font-bold uppercase font-greatVibes">Products</h1>
         </div>
 
