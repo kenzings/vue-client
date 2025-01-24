@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import DefaultLayout from '@/layouts/Default.vue';
 import AuthLayout from '@/layouts/Auth.vue';
-import  { SpeedInsights }  from "@vercel/speed-insights/dist/vue"
+import  { SpeedInsights }  from "@vercel/speed-insights/vue"
 
 // Khai báo type cho Tawk_API
 declare global {
