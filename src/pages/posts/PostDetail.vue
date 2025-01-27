@@ -12,7 +12,8 @@
                 Other Posts You Might Like
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                <PostItem v-for="otherPost in otherPosts" :key="otherPost.id" :post="otherPost" />
+                <!-- Sử dụng PostCard thay vì PostItem -->
+                <PostCard v-for="otherPost in otherPosts" :key="otherPost.id" :post="otherPost" />
             </div>
         </div>
     </div>
@@ -21,10 +22,12 @@
 <script>
 import PostItem from '@/components/posts/PostItem.vue'; // Import component PostItem
 import PostsData from '@/data/posts.json'; // Import dữ liệu từ posts.json
+import PostCard from '@/components/posts/PostCard.vue';
 
 export default {
     components: {
         PostItem,
+        PostCard,
     },
     data() {
         return {
@@ -35,6 +38,16 @@ export default {
     created() {
         const postId = Number(this.$route.params.id); // Lấy id từ URL và chuyển thành số
         this.loadPost(postId); // Gọi phương thức để tải bài viết theo id
+    },
+    watch: {
+        // Lắng nghe thay đổi của ID từ route
+        '$route.params.id': {
+            immediate: true,
+            handler(newId) {
+                const postId = Number(newId); // Chuyển ID thành số
+                this.loadPost(postId); // Gọi lại loadPost khi ID thay đổi
+            },
+        },
     },
     methods: {
         loadPost(id) {
