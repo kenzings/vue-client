@@ -7,4 +7,6 @@ export interface Product {
     category?: string;
     featured?: boolean;
     quantity?: number;
+    rating?: number;
+    reviews?: number;
 }
