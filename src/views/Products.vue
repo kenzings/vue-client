@@ -8,8 +8,8 @@
 
         <!-- Main Content -->
         <div class="container mx-auto px-4 py-8 grid grid-cols-12 gap-8">
-            <!-- Sidebar Filters -->
-            <aside class="col-span-3 bg-white rounded-lg shadow p-4">
+            <!-- Sidebar Filters (Hidden on mobile) -->
+            <aside class="hidden lg:block col-span-3 bg-white rounded-lg shadow p-4">
                 <h2 class="text-lg font-semibold mb-4">Filters</h2>
                 <div>
                     <ul class="space-y-2">
@@ -24,8 +24,15 @@
                 </div>
             </aside>
 
+            <!-- Mobile Filter Trigger -->
+            <div class="lg:hidden bg-indigo-600 text-white px-12 py-2 rounded-lg shadow mb-4 flex items-center justify-center cursor-pointer"
+                @click="showFilters = true">
+                Filter
+            </div>
+
+
             <!-- Product List -->
-            <section class="col-span-9 bg-white rounded-lg shadow p-4">
+            <section class="col-span-12 lg:col-span-9 bg-white rounded-lg shadow p-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     <ProductCard v-for="product in paginatedProducts" :key="product.id" :product="product" />
                 </div>
@@ -45,14 +52,36 @@
             <div class="container mx-auto px-4">
                 <h2 class="text-2xl font-semibold mb-4">Latest News</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- <article v-for="post in posts" :key="post.id" class="bg-white rounded-lg shadow p-4">
-                        <img :src="post.image" :alt="post.title" class="w-full h-48 object-cover rounded-lg mb-4" />
-                        <h3 class="text-lg font-semibold mb-2">{{ post.title }}</h3>
-                        <p class="text-gray-700 text-sm">{{ post.summary }}</p>
-                        <RouterLink :to="post.link" class="text-indigo-600 hover:underline text-sm">Read more
-                        </RouterLink>
-                    </article> -->
                     <PostCard v-for="post in posts" :key="post.id" :post="post" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Filter Modal -->
+        <div v-if="showFilters" class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+            <div class="bg-white rounded-lg shadow-lg w-11/12 max-w-md p-6">
+                <h2 class="text-lg font-semibold mb-4">Filters</h2>
+                <div>
+                    <ul class="space-y-2">
+                        <li v-for="category in categories" :key="category.id">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" class="form-checkbox h-5 w-5 text-indigo-600"
+                                    :value="category.name" v-model="tempSelectedCategories" />
+                                <span class="ml-2 text-gray-700">{{ category.name }}</span>
+                            </label>
+                        </li>
+                    </ul>
+                </div>
+                <div class="mt-4 flex justify-between">
+                    <!-- Close: Không áp dụng thay đổi -->
+                    <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded" @click="showFilters = false">
+                        Close
+                    </button>
+
+                    <!-- Apply: Áp dụng bộ lọc -->
+                    <button class="bg-indigo-600 text-white px-4 py-2 rounded" @click="applyFilters">
+                        Apply
+                    </button>
                 </div>
             </div>
         </div>
@@ -68,31 +97,27 @@ import type { Categories } from '@/types/Categories';
 import productsData from '@/data/products.json';
 import postsData from '@/data/posts.json';
 import categoriesData from '@/data/categories.json';
-// Mock products
-// const products = Array.from({ length: 45 }, (_, i) => ({
-//     id: i + 1,
-//     name: `Product ${i + 1}`,
-//     href: '#',
-//     price: `$${(Math.random() * 100).toFixed(2)}`,
-//     imageSrc: 'https://via.placeholder.com/150',
-//     imageAlt: `Product ${i + 1}`,
-// }));
-
 
 const products = ref<Product[]>([]);
-// Mock posts
 const posts = ref<Post[]>([]);
-
+const categories = ref<Categories[]>([]);
 const selectedCategories = ref<string[]>([]);
+const showFilters = ref(false); // State for showing/hiding the modal
+const tempSelectedCategories = ref<string[]>([]);
+
+watch(showFilters, (newValue) => {
+    if (newValue) {
+        // Khi mở modal, sao chép giá trị từ selectedCategories
+        tempSelectedCategories.value = [...selectedCategories.value];
+    }
+});
+
 
 onMounted(() => {
     products.value = productsData.products;
     posts.value = postsData.posts;
     categories.value = categoriesData.categories;
 });
-
-// Mock categories
-const categories = ref<Categories[]>([]);
 
 // Filtering
 const filteredProducts = computed(() => {
@@ -106,7 +131,7 @@ const filteredProducts = computed(() => {
 
 // Pagination logic
 const currentPage = ref(1);
-const itemsPerPage = 12; // Changed to 12 for better grid layout
+const itemsPerPage = 12;
 
 const totalPages = computed(() =>
     Math.ceil(filteredProducts.value.length / itemsPerPage)
@@ -119,9 +144,29 @@ const paginatedProducts = computed(() =>
     )
 );
 
-// Reset page when filters change
+const applyFilters = () => {
+  // Gán giá trị từ biến tạm vào selectedCategories
+  selectedCategories.value = [...tempSelectedCategories.value];
+  showFilters.value = false; // Đóng modal
+};
+
 watch(selectedCategories, () => {
     currentPage.value = 1;
 });
-
 </script>
+<style scoped>
+/* Center the modal */
+.modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Modal background */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 50;
+}
+</style>

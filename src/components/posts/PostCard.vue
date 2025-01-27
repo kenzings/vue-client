@@ -1,7 +1,7 @@
 <template>
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <!-- Post Image -->
-        <img :src="post.image" :alt="post.title" class="w-full h-48 object-cover" />
+        <img :src="post.image" :alt="post.title" class="w-full object-cover" />
 
         <!-- Post Content -->
         <div class="p-4">

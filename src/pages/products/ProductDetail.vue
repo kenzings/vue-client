@@ -1,169 +1,209 @@
 <template>
-    <div v-if="product" id="app" class="min-h-screen bg-gray-100 p-10">
-        <div class="max-w-7xl mx-auto bg-white p-10 rounded-lg shadow-lg">
+    <div v-if="product" id="app" class="min-h-screen bg-gray-100 p-6">
+        <div class="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+            <!-- Product Detail Section -->
             <div class="flex flex-col lg:flex-row gap-10">
                 <div class="lg:w-1/2">
-                    <img src="https://placehold.co/800x600"
-                        alt="Detailed view of the product showing its features and design"
+                    <img :src="product.image" :alt="`Detailed view of ${product.name}`"
                         class="rounded-lg w-full shadow-md">
                 </div>
                 <div class="lg:w-1/2">
                     <h1 class="text-4xl font-extrabold mb-6">{{ product.name }}</h1>
-                    <p class="text-2xl text-gray-700 font-semibold mb-6">{{ product.price }}</p>
+                    <p class="text-2xl text-gray-700 font-semibold mb-6">$ {{ product.price }}</p>
                     <p class="text-lg text-gray-600 mb-8 leading-relaxed">{{ product.description }}</p>
                     <div class="flex items-center mb-6">
-                        <span class="text-yellow-500 mr-3">
-                            <i class="fas fa-star" v-for="n in Math.floor(product.rating)" :key="n"></i>
-                            <i class="fas fa-star-half-alt" v-if="product.rating % 1 !== 0"></i>
+                        <span class="flex text-yellow-500 mr-3">
+                            <i class="fas fa-star" v-for="n in Math.floor(product.rating ?? 0)"
+                                :key="'filled-' + n"></i>
+                            <i class="fas fa-star-half-alt" v-if="(product.rating ?? 0) % 1 !== 0"></i>
+                            <i class="fas fa-star text-gray-400" v-for="n in (5 - Math.ceil(product.rating ?? 0))"
+                                :key="'empty-' + n"></i>
                         </span>
-                        <span class="text-gray-600 text-lg">{{ product.rating }} ({{ product.reviews }} reviews)</span>
+                        <span class="text-gray-600 text-lg">
+                            {{ product.rating ?? "No rating" }} ({{ product.reviews ?? 0 }} reviews)
+                        </span>
                     </div>
                     <button class="bg-blue-600 text-white px-6 py-3 text-lg rounded-lg hover:bg-blue-700 transition">
                         Add to Cart
                     </button>
                 </div>
             </div>
+
+            <!-- Related Products Section -->
             <div class="mt-12">
                 <h2 class="text-3xl font-bold mb-6">Related Products</h2>
-                <div class="relative">
-                    <div ref="scrollContainer" class="flex overflow-x-auto hide-scroll-bar gap-6 pb-4">
-                        <div v-for="relatedProduct in relatedProducts" :key="relatedProduct.id" class="shrink-0">
-                            <div class="bg-white p-6 rounded-lg shadow-md w-80">
-                                <img :src="relatedProduct.image" :alt="relatedProduct.alt"
+                <div v-if="relatedProducts.length" class="relative" @mouseenter="pauseScroll"
+                    @mouseleave="resumeScroll">
+                    <div ref="scrollContainer"
+                        class="flex overflow-x-auto snap-x snap-mandatory hide-scroll-bar gap-6 pb-4">
+                        <div v-for="relatedProduct in relatedProducts" :key="relatedProduct.id"
+                            class="shrink-0 snap-start w-72">
+                            <div class="bg-white rounded-lg shadow-md h-full">
+                                <img :src="relatedProduct.image" :alt="relatedProduct.name"
                                     class="rounded-lg w-full mb-4 shadow-sm">
-                                <h3 class="text-xl font-bold mb-3">{{ relatedProduct.name }}</h3>
-                                <p class="text-lg text-gray-700 mb-4">{{ relatedProduct.price }}</p>
-                                <button
-                                    class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
-                                    View Details
-                                </button>
+                                <div class="p-4">
+                                    <h3 class="text-xl font-bold mb-3">{{ relatedProduct.name }}</h3>
+                                    <p class="text-lg text-gray-700 mb-4">$ {{ relatedProduct.price }}</p>
+                                    <button @click="viewProduct(relatedProduct.id)"
+                                        class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                                        View Details
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <button @click="scrollLeft"
-                        class="absolute top-1/2 left-2 transform -translate-y-1/2 bg-gray-800 text-white p-3 rounded-full shadow-md focus:outline-none">
+                    <button @click="scrollLeft" v-if="canScrollLeft"
+                        class="absolute top-1/2 left-2 transform -translate-y-1/2 bg-gray-800 text-white p-3 rounded-full shadow-md focus:outline-none hover:bg-gray-700">
                         <i class="fas fa-chevron-left"></i>
                     </button>
-                    <button @click="scrollRight"
-                        class="absolute top-1/2 right-2 transform -translate-y-1/2 bg-gray-800 text-white p-3 rounded-full shadow-md focus:outline-none">
+                    <button @click="scrollRight" v-if="canScrollRight"
+                        class="absolute top-1/2 right-2 transform -translate-y-1/2 bg-gray-800 text-white p-3 rounded-full shadow-md focus:outline-none hover:bg-gray-700">
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
+                <div v-else class="text-gray-500 text-lg">No related products available.</div>
             </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import productsData from '@/data/products.json';
+import type { Product } from '@/types/Product';
 
 const route = useRoute();
 const router = useRouter();
 const scrollContainer = ref<HTMLDivElement | null>(null);
 const autoScrollInterval = ref<ReturnType<typeof setInterval> | null>(null);
+const isScrolling = ref(false);
+const canScrollLeft = ref(false);
+const canScrollRight = ref(false);
 
-// Extract and parse ID from route
+// Product data
 const productId = Number(route.params.id);
+const product = ref<Product | null>(
+    productsData.products.find((p) => p.id === productId) || null
+);
+const relatedProducts = ref<Product[]>([]);
 
-// Find product by ID
-const product = ref(productsData.products.find((p) => p.id === productId) || null);
+// Scroll handlers
+const updateScrollButtons = () => {
+    if (!scrollContainer.value) return;
 
-const relatedProducts = ref([
-    { id: 1, name: 'Related Product 1', price: '$49.99', image: 'https://placehold.co/300x200', alt: 'Image of Related Product 1' },
-    { id: 2, name: 'Related Product 2', price: '$59.99', image: 'https://placehold.co/300x200', alt: 'Image of Related Product 2' },
-    { id: 3, name: 'Related Product 3', price: '$69.99', image: 'https://placehold.co/300x200', alt: 'Image of Related Product 3' },
-    { id: 4, name: 'Related Product 4', price: '$79.99', image: 'https://placehold.co/300x200', alt: 'Image of Related Product 4' },
-    { id: 5, name: 'Related Product 5', price: '$89.99', image: 'https://placehold.co/300x200', alt: 'Image of Related Product 5' },
-    { id: 6, name: 'Related Product 6', price: '$99.99', image: 'https://placehold.co/300x200', alt: 'Image of Related Product 6' }
-]);
+    const { scrollLeft, scrollWidth, clientWidth } = scrollContainer.value;
+    canScrollLeft.value = scrollLeft > 0;
+    canScrollRight.value = scrollLeft + clientWidth < scrollWidth;
+};
 
 const scrollLeft = () => {
-    scrollContainer.value?.scrollBy({
-        left: -300,
+    if (!scrollContainer.value) return;
+    const cardWidth = 288; // 72rem (w-72)
+    const gapWidth = 24; // 6 spacing units
+    const scrollAmount = cardWidth + gapWidth;
+
+    scrollContainer.value.scrollBy({
+        left: -scrollAmount,
         behavior: 'smooth',
     });
 };
 
 const scrollRight = () => {
-    scrollContainer.value?.scrollBy({
-        left: 300,
+    if (!scrollContainer.value) return;
+    const cardWidth = 288; // 72rem (w-72)
+    const gapWidth = 24; // 6 spacing units
+    const scrollAmount = cardWidth + gapWidth;
+
+    scrollContainer.value.scrollBy({
+        left: scrollAmount,
         behavior: 'smooth',
     });
 };
 
-const startAutoScroll = () => {
-    if (!scrollContainer.value) return;
+// Auto scroll functionality
+const startAutoScroll = async () => {
+    if (!scrollContainer.value || isScrolling.value) return;
+
+    const { scrollWidth, clientWidth } = scrollContainer.value;
+    if (scrollWidth <= clientWidth) return;
+
+    isScrolling.value = true;
     autoScrollInterval.value = setInterval(() => {
         if (!scrollContainer.value) return;
 
         const { scrollLeft, scrollWidth, clientWidth } = scrollContainer.value;
+        const maxScroll = scrollWidth - clientWidth;
 
-        if (scrollLeft + clientWidth >= scrollWidth) {
-            // Scroll to the start
+        if (scrollLeft >= maxScroll) {
             scrollContainer.value.scrollTo({ left: 0, behavior: 'smooth' });
         } else {
-            // Scroll further
             scrollContainer.value.scrollBy({ left: 300, behavior: 'smooth' });
         }
-    }, 3000); // Auto-scroll every 3 seconds
+
+        updateScrollButtons();
+    }, 3000);
 };
 
 const stopAutoScroll = () => {
     if (autoScrollInterval.value) {
         clearInterval(autoScrollInterval.value);
         autoScrollInterval.value = null;
+        isScrolling.value = false;
     }
 };
 
-onMounted(() => {
+const pauseScroll = () => {
+    stopAutoScroll();
+};
+
+const resumeScroll = () => {
+    startAutoScroll();
+};
+
+const viewProduct = (id: number) => {
+    router.push({ name: 'ProductDetail', params: { id: id.toString() } });
+};
+
+// Lifecycle hooks
+onMounted(async () => {
     if (!product.value) {
         router.push({ name: 'NotFound' });
         return;
     }
 
-    startAutoScroll();
+    relatedProducts.value = productsData.products.filter(
+        (p) => p.category === product.value?.category && p.id !== product.value?.id
+    );
 
-    // Pause auto-scroll on user interaction
-    scrollContainer.value?.addEventListener('mouseenter', stopAutoScroll);
-    scrollContainer.value?.addEventListener('mouseleave', startAutoScroll);
+    await nextTick();
+
+    if (relatedProducts.value.length > 0) {
+        updateScrollButtons();
+        startAutoScroll();
+
+        if (scrollContainer.value) {
+            scrollContainer.value.addEventListener('scroll', updateScrollButtons);
+        }
+    }
 });
 
 onBeforeUnmount(() => {
     stopAutoScroll();
-
-    // Remove event listeners
-    scrollContainer.value?.removeEventListener('mouseenter', stopAutoScroll);
-    scrollContainer.value?.removeEventListener('mouseleave', startAutoScroll);
+    if (scrollContainer.value) {
+        scrollContainer.value.removeEventListener('scroll', updateScrollButtons);
+    }
 });
-
-// const addToCart = () => {
-//     alert('Product added to cart!');
-// };
-
-// const viewProduct = (id: number) => {
-//     alert(`View details of product ${id}`);
-// };
 </script>
 
-
 <style scoped>
-/* Ẩn thanh cuộn cho phần slider */
 .hide-scroll-bar::-webkit-scrollbar {
     display: none;
 }
 
 .hide-scroll-bar {
     -ms-overflow-style: none;
-    /* Internet Explorer 10+ */
     scrollbar-width: none;
-    /* Firefox */
-}
-
-/* Khoảng cách và canh chỉnh cho các button */
-button {
-    font-size: 1rem;
 }
 
 @media (min-width: 1024px) {
